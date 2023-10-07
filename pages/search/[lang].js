@@ -11,6 +11,7 @@ import Link from "next/link";
 import { tags } from "@/helper/tags";
 import { langs } from "@/helper/Languages";
 import SeoTags from "@/components/SeoTags";
+import { useSearchParams } from "next/navigation";
 
 export default function Search({ allIssues, lang }) {
   const router = useRouter();
@@ -28,19 +29,25 @@ export default function Search({ allIssues, lang }) {
     );
   }
 
+  const searchParams = useSearchParams();
+  const tags = searchParams.getAll("tag");
+  console.log(tags);
+
+  if (tags.length > 0) {
+    console.log(allIssues[0]);
+  }
+
   return (
     <>
-
       <div
         className={`${styles.landing_main} p-3 md:p-8 issues_result overflow-auto w-[100%] md:w-[54%] landing_main h-full flex flex-col items-start justify-start`}
       >
-        
         {allIssues.length ? (
           <>
             <SeoTags
-                seoTitle={`FindIssues | Find Most Recent and Unassigned ${lang} Issues!`}
-                seoDescription={`FindIssues lets you find most recently created issues on GitHub that are not assigned to anyone according to ${lang} programming language`}
-                seoUrl={`https://www.findissues.me/search/${lang}`}
+              seoTitle={`FindIssues | Find Most Recent and Unassigned ${lang} Issues!`}
+              seoDescription={`FindIssues lets you find most recently created issues on GitHub that are not assigned to anyone according to ${lang} programming language`}
+              seoUrl={`https://www.findissues.me/search/${lang}`}
             />
             <p className="w-[250px] mb-4 font-semibold text-[16px] lg:text-[18px] text-main_primary">
               <span className="inline-block italic">All Unassigned Issues</span>{" "}
@@ -52,27 +59,27 @@ export default function Search({ allIssues, lang }) {
           </>
         ) : (
           <>
-          <SeoTags
-                seoTitle={`FindIssues - Page Not Found`}
-                seoDescription={`Page Not Found`}
-                seoUrl={`https://www.findissues.me`}
-          />
-          <div className="w-fit mx-auto">
-            <p className="w-full mb-4 font-semibold text-[16px] lg:text-4xl text-main_primary text-center">
-              Page Not Found
-            </p>
-            <Image
-              src={error_404}
-              alt="error 404"
-              className="w-3/5 mx-auto mt-8"
+            <SeoTags
+              seoTitle={`FindIssues - Page Not Found`}
+              seoDescription={`Page Not Found`}
+              seoUrl={`https://www.findissues.me`}
             />
-            <Link
-              href={"/"}
-              className="w-fit bg-transparent hover:bg-white rounded-full italic text-main_primary px-4 py-1 font-semibold flex items-center gap-2 text-sm mx-auto mt-8 border-y-4 "
-            >
-              Back to Home <BsArrowRight />
-            </Link>
-          </div>
+            <div className="w-fit mx-auto">
+              <p className="w-full mb-4 font-semibold text-[16px] lg:text-4xl text-main_primary text-center">
+                Page Not Found
+              </p>
+              <Image
+                src={error_404}
+                alt="error 404"
+                className="w-3/5 mx-auto mt-8"
+              />
+              <Link
+                href={"/"}
+                className="w-fit bg-transparent hover:bg-white rounded-full italic text-main_primary px-4 py-1 font-semibold flex items-center gap-2 text-sm mx-auto mt-8 border-y-4 "
+              >
+                Back to Home <BsArrowRight />
+              </Link>
+            </div>
           </>
         )}
       </div>
@@ -134,7 +141,7 @@ async function loadIssues(url, query_lang) {
   issueItems.forEach((issue) => {
     var finalTimeFromNow = getTimeFromNow(issue.created_at);
     var lang = query_lang;
-
+    console.log(repo_res[issue.id]);
     var issueObj = {
       issueId: issue.id,
       issueNumber: issue.number,
@@ -144,6 +151,7 @@ async function loadIssues(url, query_lang) {
       timeFromNow: finalTimeFromNow,
       repo_forks: repo_res[issue.id].forks_count,
       repo_stars: repo_res[issue.id].stargazers_count,
+
       [mask]: query_lang,
     };
 
@@ -188,7 +196,7 @@ export async function getStaticProps({ params }) {
   return {
     props: {
       allIssues: lang_issues,
-      lang: params.lang
+      lang: params.lang,
     },
     revalidate: 600,
   };
